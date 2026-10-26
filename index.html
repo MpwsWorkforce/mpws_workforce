@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MPWS Workforce </title>
+
+<style>
+
+:root{
+    --mpws-blue:#00AEEF;
+    --mpws-dark:#003366;
+    --mpws-green:#A7D129;
+    --bg:#f4f7fa;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:var(--bg);
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+.header{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.logo{
+    width:90px;
+    height:auto;
+    margin-bottom:10px;
+}
+
+.live-clock{
+    font-weight:bold;
+    margin-top:10px;
+    color:#003366;
+}
+
+/* ---- approval status banner ---- */
+
+.approval-banner{
+    display:none;
+    margin-bottom:18px;
+    padding:12px 16px;
+    border-radius:8px;
+    font-weight:bold;
+    font-size:14px;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.approval-banner.show{
+    display:flex;
+}
+
+.approval-banner.pending{
+    background:#fff3e0;
+    color:#e65100;
+    border:1px solid #ffcc80;
+}
+
+.approval-banner.approved{
+    background:#e8f5e9;
+    color:#2e7d32;
+    border:1px solid #a5d6a7;
+}
+
+.approval-banner a,
+.approval-banner button{
+    font-size:13px;
+    background:var(--mpws-dark);
+    color:#fff;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    text-decoration:none;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+/* ---- locked entry section ---- */
+
+#entrySection{
+    position:relative;
+}
+
+#entrySection.locked .site-entries,
+#entrySection.locked .submit-row{
+    opacity:0.4;
+    pointer-events:none;
+    filter:grayscale(40%);
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
+
+label{
+    font-weight:bold;
+    display:block;
+    margin-bottom:5px;
+}
+
+input,
+select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+/* ---- per-site log in/out cards ---- */
+
+.site-entries{
+    margin-top:20px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+/* Optional per-site Remarks — never blocks a submit. */
+.site-remarks-row{
+    margin-top:12px;
+}
+
+.site-card textarea.site-remarks{
+    min-height:56px;
+    font-size:14px;
+}
+
+.optional-tag{
+    font-weight:normal;
+    font-size:12px;
+    color:#8a97a3;
+}
+
+.site-card{
+    border:1px solid #dde3ea;
+    border-radius:10px;
+    padding:14px 16px;
+    background:#fafbfc;
+}
+
+.site-card h3{
+    font-size:15px;
+    color:var(--mpws-dark);
+    margin-bottom:10px;
+}
+
+.site-card .form-grid{
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+}
+
+.site-card.completed{
+    background:#eefaf0;
+    border-color:#a5d6a7;
+}
+
+.site-card.cancelled{
+    background:#fdf3f3;
+    border-color:#ef9a9a;
+}
+
+.site-status{
+    display:inline-block;
+    font-size:12px;
+    font-weight:bold;
+    padding:2px 10px;
+    border-radius:10px;
+    margin-left:8px;
+    vertical-align:middle;
+}
+
+.site-status.not_completed{
+    background:#eceff1;
+    color:#607d8b;
+}
+
+.site-status.in_progress{
+    background:#fff3e0;
+    color:#e65100;
+}
+
+.site-status.completed{
+    background:#e8f5e9;
+    color:#2e7d32;
+}
+
+.site-status.cancelled{
+    background:#ffebee;
+    color:#c62828;
+}
+
+.site-action-row{
+    margin-top:12px;
+    text-align:right;
+}
+
+.site-action-btn{
+    padding:8px 20px;
+    border:none;
+    border-radius:6px;
+    background:var(--mpws-green);
+    color:#003366;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.site-action-btn:hover{
+    opacity:0.9;
+}
+
+.site-action-btn:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+
+.fine-print{
+    margin-top:28px;
+    padding-top:14px;
+    border-top:1px solid #e3e8ee;
+    text-align:center;
+    font-size:11px;
+    color:#8a97a3;
+}
+
+.site-meta{
+    font-size:13px;
+    color:#5a6b7a;
+    margin:-4px 0 10px;
+}
+
+.completed-summary{
+    color:#2e7d32;
+    font-weight:bold;
+}
+
+.cancelled-summary{
+    color:#c62828;
+    font-weight:bold;
+}
+
+.no-sites-msg{
+    text-align:center;
+    color:#888;
+    padding:20px;
+    font-style:italic;
+}
+
+.submit-row{
+    margin-top:20px;
+    text-align:center;
+}
+
+.submit-btn{
+    padding:12px 40px;
+    border:none;
+    border-radius:8px;
+    background:var(--mpws-green);
+    color:#003366;
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.submit-btn:hover{
+    opacity:0.9;
+}
+
+.submit-btn:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+
+.status-msg{
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.status-msg.success{
+    color:#2e7d32;
+}
+
+.status-msg.error{
+    color:#c62828;
+}
+
+
+/* ---- tabs ---- */
+
+.tabs{
+    display:flex;
+    gap:8px;
+    margin:22px 0 18px;
+    border-bottom:2px solid #e3e8ee;
+}
+
+.tab-btn{
+    flex:1;
+    padding:10px 14px;
+    border:none;
+    background:none;
+    font-weight:bold;
+    font-size:14px;
+    color:#5a6b7a;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    margin-bottom:-2px;
+}
+
+.tab-btn:hover{
+    color:var(--mpws-dark);
+}
+
+.tab-btn.active{
+    color:var(--mpws-dark);
+    border-bottom-color:var(--mpws-green);
+}
+
+.tab-btn:focus-visible,
+.site-action-btn:focus-visible,
+.submit-btn:focus-visible{
+    outline:2px solid var(--mpws-blue);
+    outline-offset:2px;
+}
+
+.view{
+    display:none;
+}
+
+.view.active{
+    display:block;
+}
+
+/* ---- request form ---- */
+
+textarea{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    min-height:90px;
+    resize:vertical;
+    font-size:14px;
+}
+
+input[readonly]{
+    background:#f0f3f6;
+    color:#555;
+}
+
+.hint{
+    font-size:12px;
+    color:#5a6b7a;
+    margin-top:4px;
+    font-weight:normal;
+}
+
+.request-block{
+    margin-top:18px;
+}
+
+.status-msg a{
+    color:var(--mpws-dark);
+    word-break:break-all;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <img
+            src="data:image/png;base64,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"
+            alt="Metro Pacific Water Solutions Logo"
+            class="logo"
+            onerror="this.style.display='none'">
+
+        <h1>MPWS Workforce</h1>
+
+        <p>
+            Metro Pacific Water Solutions
+        </p>
+
+        <div
+            id="liveClock"
+            class="live-clock">
+        </div>
+
+    </div>
+
+    <div id="loadMsg" class="status-msg" aria-live="polite"></div>
+
+    <div class="form-grid">
+
+        <div>
+            <label for="employeeType">Employee Type</label>
+            <select id="employeeType" onchange="onEmployeeTypeChange()">
+                <option value="">Select Type</option>
+                <option value="SEMI">SEMI</option>
+                <option value="DAILY">DAILY</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="name">Employee Name</label>
+            <input
+                type="text"
+                id="name"
+                list="employeeNamesDatalist"
+                placeholder="Select Employee Type First"
+                oninput="onEmployeeNameInput()"
+                autocomplete="off"
+                disabled>
+            <datalist id="employeeNamesDatalist"></datalist>
+        </div>
+
+        <div>
+            <label for="employeeNumber">Employee Number</label>
+            <input type="text" id="employeeNumber" readonly>
+        </div>
+
+        <div>
+            <label for="department">Department</label>
+            <input type="text" id="department" readonly>
+        </div>
+
+        <div>
+            <label for="costCenter">Cost Center</label>
+            <input type="text" id="costCenter" readonly>
+        </div>
+
+    </div>
+
+    <div class="tabs" role="tablist">
+        <button type="button" role="tab" class="tab-btn" id="tabBtnRequest" aria-selected="false" aria-controls="viewRequest" onclick="showView('request')">Request Approval</button>
+        <button type="button" role="tab" class="tab-btn active" id="tabBtnTracker" aria-selected="true" aria-controls="viewTracker" onclick="showView('tracker')">OBT Tracker</button>
+    </div>
+
+    <!-- ===== VIEW 1: OBT REQUEST ===== -->
+    <div id="viewRequest" class="view" role="tabpanel">
+
+        <div class="form-grid">
+            <div>
+                <label for="employeeEmail">Email Address</label>
+                <input
+                    type="email"
+                    id="employeeEmail"
+                    placeholder="you@company.com"
+                    autocomplete="off">
+                <div class="hint">The tracker link is sent here once your manager approves.</div>
+            </div>
+        </div>
+
+        <div class="request-block">
+            <label for="visitDate">Visit Date</label>
+            <div class="form-grid">
+                <input type="date" id="visitDate">
+            </div>
+            <div class="hint">Today up to 7 days in advance. After your manager approves, the tracker unlocks on this date.</div>
+        </div>
+
+        <div class="request-block">
+            <label>Sites to be Visited</label>
+            <div class="form-grid">
+                <input type="text" id="site1" list="siteNamesDatalist" placeholder="Site 1 (required)" autocomplete="off">
+                <input type="text" id="site2" list="siteNamesDatalist" placeholder="Site 2" autocomplete="off">
+                <input type="text" id="site3" list="siteNamesDatalist" placeholder="Site 3" autocomplete="off">
+                <input type="text" id="site4" list="siteNamesDatalist" placeholder="Site 4" autocomplete="off">
+                <input type="text" id="site5" list="siteNamesDatalist" placeholder="Site 5" autocomplete="off">
+            </div>
+            <datalist id="siteNamesDatalist"></datalist>
+            <div class="hint">Pick each site from the list. Up to 5 sites.</div>
+        </div>
+
+        <div class="request-block">
+            <label for="reason">Reason for OBT</label>
+            <textarea id="reason" placeholder="Why do you need to visit these sites?"></textarea>
+        </div>
+
+        <div class="submit-row">
+            <button type="button" id="requestBtn" class="submit-btn" onclick="submitRequest()">Request Approval</button>
+            <div id="requestMsg" class="status-msg" aria-live="polite"></div>
+        </div>
+
+    </div>
+
+    <!-- ===== VIEW 2: OBT TRACKER ===== -->
+    <div id="viewTracker" class="view active" role="tabpanel">
+
+        <div id="approvalBanner" class="approval-banner">
+            <span id="approvalBannerText"></span>
+            <button type="button" id="approvalRecheckBtn" onclick="recheckApproval()" style="display:none;">Check Again</button>
+            <button type="button" id="approvalBannerLink" onclick="showView('request')" style="display:none;">Request Approval</button>
+        </div>
+
+        <div id="entrySection" class="locked">
+
+            <div id="siteEntries" class="site-entries">
+                <div class="no-sites-msg">Select your name above to get started.</div>
+            </div>
+
+            <div class="submit-row">
+                <div id="statusMsg" class="status-msg" aria-live="polite"></div>
+            </div>
+
+        </div><!-- /entrySection -->
+
+    </div><!-- /viewTracker -->
+
+    <footer class="fine-print">Developed by JB Lebrilla for Metro Pacific Water Solutions</footer>
+
+</div>
+
+<script>
+
+/* ================================
+   EMPLOYEE LISTS
+   ================================ */
+
+let dailyEmployees = [];
+let semiEmployees = [];
+let sapCodes = [];
+let siteCodeList = [];
+let purposeList = [];
+let selectedCostCenter = "";
+let isApproved = false;
+let approvedSiteList = [];
+
+const EMPLOYEE_DATA_URL =
+    "https://script.google.com/macros/s/AKfycbydEPBJHh2ZcHGCwVbP7N4WTghVv065QXvyGPjqA2P5tNg_7YdeZPobwhtSiY4MY1m4sA/exec";
+
+
+/* Escapes text before it goes into an innerHTML string. */
+function escapeHtml(value){
+    return String(value === null || value === undefined ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+
+function loadEmployeeData(){
+
+    const typeDdl =
+        document.getElementById("employeeType");
+
+    const statusEl =
+        document.getElementById("loadMsg");
+
+    typeDdl.disabled = true;
+
+    statusEl.className = "status-msg";
+    statusEl.textContent = "Loading employee list...";
+
+    // Apps Script can take a few seconds to wake up; give up after 30s
+    // and offer a retry instead of leaving the dropdown disabled forever.
+    const controller = new AbortController();
+    const timer = setTimeout(function(){ controller.abort(); }, 30000);
+
+    fetch(EMPLOYEE_DATA_URL + "?action=getData&_=" + Date.now(), { signal: controller.signal })
+
+        .then(function(response){
+
+            if(!response.ok){
+                throw new Error(
+                    "HTTP " + response.status + " " + response.statusText
+                );
+            }
+
+            return response.text();
+
+        })
+
+        .then(function(text){
+
+            let data;
+
+            try {
+                data = JSON.parse(text);
+            } catch(parseErr){
+                console.error("Response was not JSON:", text);
+                throw new Error(
+                    "Server did not return JSON (check the Web App is deployed with access set to Anyone)."
+                );
+            }
+
+            dailyEmployees = data.daily || [];
+            semiEmployees = data.semi || [];
+            sapCodes = data.sap || [];
+            siteCodeList = data.sites || [];
+            purposeList = data.purposes || [];
+
+            const siteDatalist =
+                document.getElementById("siteNamesDatalist");
+
+            siteDatalist.innerHTML = "";
+
+            siteCodeList.forEach(s => {
+                const option = document.createElement("option");
+                option.value = s.name;
+                siteDatalist.appendChild(option);
+            });
+
+            statusEl.textContent = "";
+            typeDdl.disabled = false;
+
+        })
+
+        .catch(function(err){
+
+            console.error("loadEmployeeData failed:", err);
+
+            const reason = err.name === "AbortError"
+                ? "the server took longer than 30 seconds to respond."
+                : err.message;
+
+            statusEl.className = "status-msg error";
+            statusEl.textContent =
+                "Could not load the employee list: " + reason + " ";
+
+            const retry = document.createElement("button");
+            retry.type = "button";
+            retry.className = "site-action-btn";
+            retry.textContent = "Try again";
+            retry.onclick = loadEmployeeData;
+            statusEl.appendChild(retry);
+
+        })
+
+        .finally(function(){
+            clearTimeout(timer);
+        });
+
+}
+
+
+/* Shows a "yyyy-MM-dd HH:mm" timestamp from the server in 12-hour
+   time ("2026-10-02 1:41 PM"). Display only — the sheet still stores the
+   real date/time value. Anything not in that shape passes through as-is. */
+function formatTime12h(ts){
+
+    const m = /^(\d{4}-\d{2}-\d{2})[ T](\d{1,2}):(\d{2})(?::\d{2})?$/.exec(String(ts || ""));
+
+    if(!m){
+        return String(ts || "");
+    }
+
+    const h24 = parseInt(m[2], 10);
+    const h12 = (h24 % 12) === 0 ? 12 : (h24 % 12);
+
+    return m[1] + " " + h12 + ":" + m[3] + " " + (h24 >= 12 ? "PM" : "AM");
+
+}
+
+
+function pad2(n){
+    return String(n).padStart(2, "0");
+}
+
+/* Extracts the "HH:MM" part the <input type="time"> fields need from a
+   server timestamp ("2026-10-09 14:32"). Returns "" when there's no
+   usable time in the string. */
+function toTimeInputValue(ts){
+
+    const m = /(\d{1,2}):(\d{2})/.exec(String(ts || ""));
+
+    if(!m){
+        return "";
+    }
+
+    return pad2(parseInt(m[1], 10)) + ":" + m[2];
+
+}
+
+/* Local "yyyy-MM-dd HH:mm" — same shape formatTime12h expects. */
+function formatNow(){
+    const d = new Date();
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()) +
+           " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+}
+
+/* Un-logged time fields show the current time while the matching status
+   is selected — but only until the employee types in them (data-touched)
+   or while the field has focus, so a manual entry is never overwritten.
+   Logged times (data-logged) never change. The value written to the
+   sheet is whatever the employee typed (validated server-side). */
+function refreshPendingTimes(){
+
+    document.querySelectorAll("#siteEntries .site-card").forEach(function(card){
+
+        const sel = card.querySelector("select[id^='siteStatus_']");
+        if(!sel){ return; }   // completed card — nothing editable
+
+        const idx = sel.id.replace("siteStatus_", "");
+        const startEl = document.getElementById("timeStarted_" + idx);
+        const doneEl = document.getElementById("timeCompleted_" + idx);
+        if(!startEl || !doneEl){ return; }
+
+        const nowHm = formatNow().slice(11);   // "HH:MM" for <input type="time">
+
+        // Time Completed only matters once "Completed" is selected.
+        doneEl.disabled = !!doneEl.dataset.logged ? false : sel.value !== "Completed";
+
+        // Cancelled visits log no times — grey out Time Started too
+        // (re-enabled automatically if the employee switches back).
+        startEl.disabled = !startEl.dataset.logged && sel.value === "Cancelled";
+
+        // Remarks are only offered alongside Completed / Cancelled —
+        // the box is hidden while Time Started is selected so a note is
+        // always submitted together with the final action.
+        const remarksRow = document.getElementById("remarksRow_" + idx);
+        if(remarksRow){
+            const forFinalAction = sel.value === "Completed" || sel.value === "Cancelled";
+            remarksRow.style.display = forFinalAction ? "" : "none";
+        }
+
+        if(!startEl.dataset.logged && !startEl.dataset.touched && document.activeElement !== startEl){
+            startEl.value = nowHm;
+        }
+
+        if(!doneEl.dataset.logged && !doneEl.dataset.touched && document.activeElement !== doneEl){
+            doneEl.value = sel.value === "Completed" ? nowHm : "";
+        }
+
+    });
+
+}
+
+
+/* Read-only summary of any times left on a locked (cancelled) row.
+   Cancelling never stamps Time Completed, but a row cancelled after it
+   was started keeps its Time Started — show it as plain text. */
+function cancelledTimesText(timeStarted, timeCompleted){
+
+    const parts = [];
+    if(timeStarted){
+        parts.push("Time Started: " + escapeHtml(toTimeInputValue(timeStarted) || timeStarted));
+    }
+    if(timeCompleted){
+        parts.push("Time Completed: " + escapeHtml(toTimeInputValue(timeCompleted) || timeCompleted));
+    }
+    return parts.length
+        ? '<div class="site-meta">' + parts.join(" &middot; ") + '</div>'
+        : "";
+}
+
+
+/* Build one card per approved site, reflecting its ACTUAL current
+   state from the server:
+     - not started  -> dropdown: Time Started / Completed
+     - started      -> dropdown: Completed only (start time is shown)
+     - completed    -> read-only, locked, shows both times
+   Time Started / Time Completed show the current time until submitted,
+   then the logged time. */
+function renderApprovedSiteEntries(approvedSites){
+
+    approvedSiteList = approvedSites || [];
+
+    const container =
+        document.getElementById("siteEntries");
+
+    container.innerHTML = "";
+
+    if(approvedSiteList.length === 0){
+        container.innerHTML =
+            '<div class="no-sites-msg">No approved sites found for today.</div>';
+        return;
+    }
+
+    approvedSiteList.forEach((site, index) => {
+
+        const siteName = site.name;
+
+        // Look up this project's Site Location and SAP Code from the
+        // SITES tab so all three get logged together.
+        const siteMatch =
+            siteCodeList.find(
+                r => r.name.trim().toLowerCase() === siteName.trim().toLowerCase()
+            );
+
+        const isCompleted = site.status === "completed";
+        const isCancelled = site.status === "cancelled";
+        const isLocked = isCompleted || isCancelled;
+        const timeStarted = site.timeStarted || "";
+        // Older rows completed before Time Completed existed fall back
+        // to their original timestamp.
+        const timeCompleted = site.timeCompleted || (isCompleted ? (site.timestamp || "") : "");
+        const isStarted = !!timeStarted && !isLocked;
+
+        const card = document.createElement("div");
+        card.dataset.site = siteName;
+        card.dataset.location = siteMatch ? siteMatch.location : "";
+        card.dataset.sapCode = siteMatch ? siteMatch.sapCode : "";
+        card.dataset.status = isCompleted ? "completed" : (isCancelled ? "cancelled" : (isStarted ? "started" : "not_completed"));
+        card.className = "site-card" + (isCompleted ? " completed" : (isCancelled ? " cancelled" : ""));
+
+        const badgeClass = isCompleted ? "completed" : (isCancelled ? "cancelled" : (isStarted ? "in_progress" : "not_completed"));
+        const badgeLabel = isCompleted ? "Completed" : (isCancelled ? "Cancelled" : (isStarted ? "In Progress" : "Not Completed"));
+
+        const sapLine = (siteMatch && siteMatch.sapCode)
+            ? '<div class="site-meta">SAP Code: ' + escapeHtml(siteMatch.sapCode) + '</div>'
+            : '';
+
+        // Once started, only Completed / Cancelled are offered.
+        const options = isStarted
+            ? '<option value="Completed" selected>Completed</option>' +
+              '<option value="Cancelled">Cancelled</option>'
+            : '<option value="Time Started" selected>Time Started</option>' +
+              '<option value="Completed">Completed</option>' +
+              '<option value="Cancelled">Cancelled</option>';
+
+        // Manual time entry: editable "HH:MM" fields until they are
+        // logged, then read-only with the value stored on the sheet.
+        const timeFields =
+            '<div>' +
+                '<label for="timeStarted_' + index + '">Time Started</label>' +
+                '<input type="time" id="timeStarted_' + index + '"' +
+                    (timeStarted
+                        ? ' readonly data-logged="1" value="' + escapeHtml(toTimeInputValue(timeStarted)) + '"'
+                        : ' oninput="this.dataset.touched=\'1\'"') + '>' +
+            '</div>' +
+            '<div>' +
+                '<label for="timeCompleted_' + index + '">Time Completed</label>' +
+                '<input type="time" id="timeCompleted_' + index + '"' +
+                    (timeCompleted
+                        ? ' readonly data-logged="1" value="' + escapeHtml(toTimeInputValue(timeCompleted)) + '"'
+                        : ' oninput="this.dataset.touched=\'1\'"') + '>' +
+            '</div>';
+
+        // Purpose dropdown — options come from the PURPOSE tab. On a
+        // completed card it is shown as plain text instead.
+        const purposeSelect = purposeList.length > 0
+            ? '<select id="purpose_' + index + '">' +
+                '<option value="">Select purpose</option>' +
+                purposeList.map(p =>
+                    '<option value="' + escapeHtml(p) + '"' +
+                    (p === (site.purpose || "") ? ' selected' : '') + '>' +
+                    escapeHtml(p) + '</option>'
+                ).join("") +
+              '</select>'
+            : '<select id="purpose_' + index + '" disabled>' +
+                '<option value="">Add purposes on the PURPOSE tab</option>' +
+              '</select>';
+
+        const purposeMeta = site.purpose
+            ? '<div class="site-meta">Purpose: ' + escapeHtml(site.purpose) + '</div>'
+            : '';
+
+        // Optional Remarks (free text). Editable while the card is open,
+        // shown as plain text on locked cards so the note stays visible.
+        const remarksValue = site.remarks || "";
+        const remarksMeta = remarksValue
+            ? '<div class="site-meta">Remarks: ' + escapeHtml(remarksValue) + '</div>'
+            : '';
+        const remarksField =
+            '<label for="remarks_' + index + '">Remarks <span class="optional-tag">(optional)</span></label>' +
+            '<textarea id="remarks_' + index + '" class="site-remarks" rows="2" maxlength="500"' +
+            ' placeholder="Add a note for this site, if any">' + escapeHtml(remarksValue) + '</textarea>';
+
+        // Once a site is submitted as Completed it is final: the card
+        // renders read-only with no dropdown and no submit button.
+        card.innerHTML =
+            '<h3>' + escapeHtml(siteName) + '<span class="site-status ' + badgeClass + '">' + badgeLabel + '</span></h3>' +
+            sapLine +
+            (isCompleted
+                ? purposeMeta + remarksMeta +
+                  '<div class="form-grid">' + timeFields + '</div>' +
+                  '<div class="completed-summary" style="margin-top:10px;">Completed &mdash; status is locked and can no longer be changed.</div>'
+                : isCancelled
+                ? purposeMeta + remarksMeta + cancelledTimesText(timeStarted, timeCompleted) +
+                  '<div class="cancelled-summary" style="margin-top:10px;">Cancelled &mdash; this visit did not take place and the status is locked.</div>'
+                : '<div class="form-grid">' +
+                    '<div>' +
+                        '<label for="siteStatus_' + index + '">Status</label>' +
+                        '<select id="siteStatus_' + index + '" onchange="refreshPendingTimes()">' + options + '</select>' +
+                    '</div>' +
+                    '<div>' +
+                        '<label for="purpose_' + index + '">Purpose</label>' +
+                        purposeSelect +
+                    '</div>' +
+                    timeFields +
+                  '</div>' +
+                  '<div class="site-remarks-row" id="remarksRow_' + index + '">' + remarksField + '</div>' +
+                  '<div class="site-action-row">' +
+                    '<button type="button" class="site-action-btn" onclick="submitSiteStatus(' + index + ')">Submit Status</button>' +
+                  '</div>');
+
+        container.appendChild(card);
+
+    });
+
+    refreshPendingTimes();
+
+}
+
+
+/* ================================
+   TABS
+   ================================
+   One page, two views: Request Approval (the old request form) and
+   OBT Tracker (the approval-gated site cards). Both share the employee
+   fields at the top, so you only pick your name once.
+*/
+
+function showView(name){
+
+    const isRequest = name === "request";
+
+    document.getElementById("viewRequest").classList.toggle("active", isRequest);
+    document.getElementById("viewTracker").classList.toggle("active", !isRequest);
+    document.getElementById("tabBtnRequest").classList.toggle("active", isRequest);
+    document.getElementById("tabBtnTracker").classList.toggle("active", !isRequest);
+    document.getElementById("tabBtnRequest").setAttribute("aria-selected", isRequest ? "true" : "false");
+    document.getElementById("tabBtnTracker").setAttribute("aria-selected", isRequest ? "false" : "true");
+
+    // Coming back to the tracker: re-check, in case the manager approved
+    // while the person was on the request tab.
+    if(!isRequest && lastCheckedEmpNo && document.getElementById("employeeNumber").value){
+        checkApprovalStatus(lastCheckedEmpNo);
+    }
+
+    // Re-open request tab: refresh the visit-date window (an open page
+    // past midnight must not offer a date the server will reject).
+    if(isRequest){ initVisitDate(); }
+
+}
+
+/* Visit Date defaults to today; the window is today .. today + 7 days.
+   Called on load and every time the request tab opens. */
+function initVisitDate(){
+
+    const el = document.getElementById("visitDate");
+    if(!el){ return; }
+
+    const now = new Date();
+    const today = now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-" + pad2(now.getDate());
+    const maxDate = new Date(now.getTime() + 7 * 86400000);
+    const max = maxDate.getFullYear() + "-" + pad2(maxDate.getMonth() + 1) + "-" + pad2(maxDate.getDate());
+
+    el.min = today;
+    el.max = max;
+    if(!el.value || el.value < today || el.value > max){
+        el.value = today;
+    }
+
+}
+
+initVisitDate();
+
+
+function clearEmployeeFields(){
+
+    document.getElementById("employeeNumber").value = "";
+    document.getElementById("department").value = "";
+    document.getElementById("costCenter").value = "";
+    document.getElementById("employeeEmail").value = "";
+    selectedCostCenter = "";
+    lastCheckedEmpNo = "";
+
+    hideApprovalBanner();
+    renderApprovedSiteEntries([]);
+    lockEntrySection();
+
+}
+
+
+function onEmployeeTypeChange(){
+
+    const type =
+        document.getElementById("employeeType").value;
+
+    const nameInput =
+        document.getElementById("name");
+
+    const datalist =
+        document.getElementById("employeeNamesDatalist");
+
+    datalist.innerHTML = "";
+    nameInput.value = "";
+    clearEmployeeFields();
+
+    if(!type){
+
+        nameInput.disabled = true;
+        nameInput.placeholder = "Select Employee Type First";
+
+        return;
+
+    }
+
+    const list =
+        type === "DAILY" ?
+            dailyEmployees :
+            semiEmployees;
+
+    list.forEach(emp => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            emp.name +
+            " (" +
+            emp.empNo +
+            ")";
+
+        datalist.appendChild(option);
+
+    });
+
+    nameInput.disabled = false;
+    nameInput.placeholder =
+        list.length === 0 ?
+            "No employees loaded for this type yet" :
+            "Type to search...";
+
+}
+
+
+function onEmployeeNameInput(){
+
+    const type =
+        document.getElementById("employeeType").value;
+
+    const typed =
+        document.getElementById("name").value;
+
+    const list =
+        type === "DAILY" ?
+            dailyEmployees :
+            semiEmployees;
+
+    const employee =
+        list.find(
+            e => (e.name + " (" + e.empNo + ")") === typed
+        );
+
+    if(employee){
+
+        document.getElementById("employeeNumber").value =
+            employee.empNo;
+
+        document.getElementById("department").value =
+            employee.department;
+
+        selectedCostCenter =
+            employee.costCenter || "";
+
+        document.getElementById("costCenter").value =
+            selectedCostCenter;
+
+        // Email comes from the roster but stays editable on the Request tab.
+        document.getElementById("employeeEmail").value =
+            employee.email || "";
+
+        checkApprovalStatus(employee.empNo);
+
+    } else {
+
+        clearEmployeeFields();
+
+    }
+
+}
+
+
+/* ================================
+   APPROVAL GATE
+   ================================
+   Called once an employee is selected. Locks the site-entry section
+   (opacity + pointer-events: none) until an Approved OBT Request
+   exists for today. The banner switches to the Request Approval tab
+   and has a "Check Again" button for after the manager approves.
+*/
+
+let lastCheckedEmpNo = "";
+
+function checkApprovalStatus(empNo){
+
+    lastCheckedEmpNo = empNo;
+
+    const banner =
+        document.getElementById("approvalBanner");
+
+    const bannerText =
+        document.getElementById("approvalBannerText");
+
+    const bannerLink =
+        document.getElementById("approvalBannerLink");
+
+    const recheckBtn =
+        document.getElementById("approvalRecheckBtn");
+
+    banner.className = "approval-banner show pending";
+    bannerText.textContent = "Checking approval status...";
+    bannerLink.style.display = "none";
+    recheckBtn.style.display = "none";
+
+    // "_=" + Date.now() is a cache-buster — GET requests to the Apps
+    // Script web app can otherwise get cached by the browser, showing a
+    // stale "not approved" result even right after a manager approves.
+    fetch(EMPLOYEE_DATA_URL + "?action=checkApproval&empNo=" + encodeURIComponent(empNo) + "&_=" + Date.now())
+
+        .then(function(response){ return response.json(); })
+
+        .then(function(res){
+
+            isApproved = !!res.approved;
+
+            if(isApproved){
+
+                banner.className = "approval-banner show approved";
+                bannerText.textContent = "Approved — you can submit your OBT entry.";
+                bannerLink.style.display = "none";
+                recheckBtn.style.display = "none";
+                renderApprovedSiteEntries(res.sites || []);
+                unlockEntrySection();
+
+            } else {
+
+                banner.className = "approval-banner show pending";
+                bannerText.textContent = "No approved OBT request for today yet.";
+                bannerLink.textContent = "Request Approval";
+                bannerLink.style.display = "inline-block";
+                recheckBtn.style.display = "inline-block";
+                renderApprovedSiteEntries([]);
+                lockEntrySection();
+
+            }
+
+        })
+
+        .catch(function(){
+
+            banner.className = "approval-banner show pending";
+            bannerText.textContent = "Could not check approval status. Try again.";
+            bannerLink.style.display = "none";
+            recheckBtn.style.display = "inline-block";
+            lockEntrySection();
+
+        });
+
+}
+
+function recheckApproval(){
+    if(lastCheckedEmpNo){
+        checkApprovalStatus(lastCheckedEmpNo);
+    }
+}
+
+function hideApprovalBanner(){
+    document.getElementById("approvalBanner").className = "approval-banner";
+}
+
+function lockEntrySection(){
+    document.getElementById("entrySection").classList.add("locked");
+}
+
+function unlockEntrySection(){
+    document.getElementById("entrySection").classList.remove("locked");
+}
+
+
+/* ================================
+   SUBMIT — per site status
+   ================================
+   Each site card has a single action: submit "Time Started" or
+   "Completed" for that site, together with the employee's MANUAL
+   Time Started / Time Completed entries and the Purpose picked from
+   the PURPOSE tab dropdown. The server validates and stores them.
+   No "mode: no-cors" on purpose — that made the browser blind to the
+   server's response, so it always reported "success" even when the
+   server rejected it.
+*/
+
+function getIdentityFields(){
+    return {
+        employeeType: document.getElementById("employeeType").value,
+        empNo: document.getElementById("employeeNumber").value,
+        name: document.getElementById("name").value.split(" (")[0],
+        department: document.getElementById("department").value,
+        costCenter: selectedCostCenter
+    };
+}
+
+function setSiteErr(msg){
+    const statusEl = document.getElementById("statusMsg");
+    statusEl.textContent = msg;
+    statusEl.className = "status-msg error";
+}
+
+function submitSiteStatus(index){
+
+    const statusEl = document.getElementById("statusMsg");
+
+    if(!isApproved){
+        statusEl.textContent = "This OBT entry is not approved yet.";
+        statusEl.className = "status-msg error";
+        return;
+    }
+
+    const card = document.querySelectorAll("#siteEntries .site-card")[index];
+
+    if(card.dataset.status === "completed"){
+        statusEl.textContent = "This site was already completed — its status can no longer be changed.";
+        statusEl.className = "status-msg error";
+        return;
+    }
+
+    if(card.dataset.status === "cancelled"){
+        statusEl.textContent = "This site was cancelled — its status can no longer be changed.";
+        statusEl.className = "status-msg error";
+        return;
+    }
+
+    const statusElm = document.getElementById("siteStatus_" + index);
+    const status = statusElm ? statusElm.value : "";
+    const purposeEl = document.getElementById("purpose_" + index);
+    const purpose = purposeEl ? purposeEl.value.trim() : "";
+    const startEl = document.getElementById("timeStarted_" + index);
+    const doneEl = document.getElementById("timeCompleted_" + index);
+    const timeStarted = startEl ? startEl.value : "";
+    const timeCompleted = doneEl ? doneEl.value : "";
+
+    // Remarks are OPTIONAL and only sent with Completed / Cancelled —
+    // the box is hidden while Time Started is selected. Blank is fine
+    // and never blocks a submit.
+    const remarksEl = document.getElementById("remarks_" + index);
+    const remarks = (status === "Completed" || status === "Cancelled") && remarksEl
+        ? remarksEl.value.trim()
+        : "";
+
+    // Purpose is required whenever the PURPOSE tab has entries — except
+    // for Cancelled, where the visit never happened.
+    if(status !== "Cancelled" && purposeList.length > 0 && !purpose){
+        setSiteErr("Select a purpose for visiting this site.");
+        return;
+    }
+
+    if(status === "Time Started" && !timeStarted){
+        setSiteErr("Enter the Time Started for this site.");
+        return;
+    }
+
+    if(status === "Completed"){
+        if(!timeCompleted){
+            setSiteErr("Enter the Time Completed for this site.");
+            return;
+        }
+        if(timeStarted && timeCompleted < timeStarted){
+            setSiteErr("Time Completed cannot be earlier than Time Started.");
+            return;
+        }
+    }
+
+    const identity = getIdentityFields();
+    const btn = card.querySelector(".site-action-btn");
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    statusEl.textContent = "";
+    statusEl.className = "status-msg";
+
+    fetch(EMPLOYEE_DATA_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(Object.assign({
+            formType: "siteStatus",
+            site: card.dataset.site,
+            location: card.dataset.location,
+            sapCode: card.dataset.sapCode,
+            status: status,              // "Time Started" | "Completed" | "Cancelled"
+            purpose: purpose,            // chosen from the PURPOSE tab list
+            remarks: remarks,            // optional free text (may be "")
+            timeStarted: timeStarted,    // manual "HH:MM"
+            timeCompleted: timeCompleted // manual "HH:MM"
+        }, identity))
+    })
+    .then(function(response){ return response.json(); })
+    .then(function(res){
+        if(res.success){
+            statusEl.textContent =
+                (status === "Time Started" ? "Time started for " :
+                 status === "Cancelled" ? "Cancelled: " : "Completed: ") + card.dataset.site + ".";
+            statusEl.className = "status-msg success";
+            checkApprovalStatus(identity.empNo);
+        } else {
+            statusEl.textContent = res.message || "Failed to save status.";
+            statusEl.className = "status-msg error";
+            btn.disabled = false;
+            btn.textContent = "Submit Status";
+        }
+    })
+    .catch(function(){
+        statusEl.textContent = "Failed to save status. Please try again.";
+        statusEl.className = "status-msg error";
+        btn.disabled = false;
+        btn.textContent = "Submit Status";
+    });
+
+}
+
+
+function resetForm(){
+
+    document.getElementById("employeeType").value = "";
+    document.getElementById("name").value = "";
+    document.getElementById("name").disabled = true;
+    document.getElementById("name").placeholder = "Select Employee Type First";
+    document.getElementById("employeeNamesDatalist").innerHTML = "";
+
+    clearEmployeeFields();
+    isApproved = false;
+
+}
+
+
+/* ================================
+   SUBMIT — OBT approval request
+   ================================
+   Sends the request to the same web app as the tracker. The manager
+   gets an email with Approve / Reject links; once approved, the
+   employee gets an email linking back to this page's OBT Tracker tab.
+*/
+
+function setRequestMsg(text, kind){
+    const el = document.getElementById("requestMsg");
+    el.textContent = text;
+    el.className = "status-msg" + (kind ? " " + kind : "");
+    return el;
+}
+
+function submitRequest(){
+
+    const employeeType = document.getElementById("employeeType").value;
+    const empNo = document.getElementById("employeeNumber").value;
+    const name = document.getElementById("name").value.split(" (")[0];
+    const employeeEmail = document.getElementById("employeeEmail").value.trim();
+    const reason = document.getElementById("reason").value.trim();
+    const visitDate = document.getElementById("visitDate").value;
+    const submitBtn = document.getElementById("requestBtn");
+
+    const typedSites = ["site1","site2","site3","site4","site5"]
+        .map(id => document.getElementById(id).value.trim())
+        .filter(s => s.length > 0);
+
+    if(!employeeType){
+        setRequestMsg("Select an employee type.", "error");
+        return;
+    }
+    if(!empNo){
+        setRequestMsg("Select your name from the list.", "error");
+        return;
+    }
+    if(!employeeEmail || employeeEmail.indexOf("@") === -1){
+        setRequestMsg("Enter a valid email address.", "error");
+        return;
+    }
+    if(typedSites.length === 0){
+        setRequestMsg("Add at least one site to be visited.", "error");
+        return;
+    }
+
+    // Sites must match the Site list exactly (ignoring case) — the tracker
+    // matches approved sites to the master list by name, so a typo here
+    // would leave the site without a Location / SAP Code later.
+    const sites = [];
+    const unknown = [];
+
+    typedSites.forEach(typed => {
+        if(siteCodeList.length === 0){
+            if(sites.indexOf(typed) === -1) sites.push(typed);
+            return;
+        }
+        const match = siteCodeList.find(
+            s => s.name.trim().toLowerCase() === typed.toLowerCase()
+        );
+        if(!match){
+            unknown.push(typed);
+        } else if(sites.indexOf(match.name) === -1){
+            sites.push(match.name);
+        }
+    });
+
+    if(unknown.length > 0){
+        setRequestMsg("Not in the site list: " + unknown.join(", ") + ". Pick sites from the dropdown.", "error");
+        return;
+    }
+    if(!reason){
+        setRequestMsg("Enter a reason for the OBT request.", "error");
+        return;
+    }
+    if(!visitDate){
+        setRequestMsg("Choose a visit date.", "error");
+        return;
+    }
+    // Same window the server enforces (today .. today + 7 days) so the
+    // error shows instantly instead of after a round trip.
+    const todayStr = formatNow().slice(0, 10);
+    const maxDate = new Date(Date.now() + 7 * 86400000);
+    const maxStr = maxDate.getFullYear() + "-" + pad2(maxDate.getMonth() + 1) + "-" + pad2(maxDate.getDate());
+    if(visitDate < todayStr){
+        setRequestMsg("Visit date cannot be in the past. Choose today or a later date.", "error");
+        return;
+    }
+    if(visitDate > maxStr){
+        setRequestMsg("You can request up to 7 days in advance.", "error");
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
+    setRequestMsg("", "");
+
+    fetch(EMPLOYEE_DATA_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+            formType: "request",
+            employeeType: employeeType,
+            empNo: empNo,
+            name: name,
+            department: document.getElementById("department").value,
+            employeeEmail: employeeEmail,
+            visitDate: visitDate,
+            sites: sites,
+            reason: reason
+        })
+    })
+    .then(function(response){ return response.json(); })
+    .then(function(res){
+
+        if(!res.success){
+            setRequestMsg(res.message || "Request failed.", "error");
+            return;
+        }
+
+        ["site1","site2","site3","site4","site5","reason"].forEach(
+            id => { document.getElementById(id).value = ""; }
+        );
+
+        if(res.emailSent){
+            setRequestMsg(
+                "Request sent to " + res.manager +
+                (res.backup ? " (backup approver: " + res.backup + ")" : "") +
+                (res.visitDate ? " for " + res.visitDate : "") +
+                ". You'll get an email with the tracker link once it's approved.",
+                "success"
+            );
+        } else {
+            const el = setRequestMsg(
+                "Request saved, but the email to " + res.manager +
+                (res.backup ? " / " + res.backup : "") +
+                " didn't send. Share this approval link with them directly: ",
+                "error"
+            );
+            const link = document.createElement("a");
+            link.href = res.approveUrl;
+            link.textContent = res.approveUrl;
+            el.appendChild(link);
+        }
+
+    })
+    .catch(function(){
+        setRequestMsg("Could not reach the server. Try again.", "error");
+    })
+    .finally(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Request Approval";
+    });
+
+}
+
+
+function updateClock(){
+
+    const now =
+        new Date();
+
+    document.getElementById(
+        "liveClock"
+    ).innerHTML =
+
+        now.toLocaleDateString() +
+        " | " +
+        now.toLocaleTimeString();
+
+    refreshPendingTimes();
+
+}
+
+window.onload = function(){
+
+    updateClock();
+
+    setInterval(
+        updateClock,
+        1000
+    );
+
+    loadEmployeeData();
+
+    // Deep link: ...index.html#request opens the Request Approval tab.
+    if(window.location.hash === "#request"){
+        showView("request");
+    }
+
+};
+
+</script>
+
+</body>
+</html>
